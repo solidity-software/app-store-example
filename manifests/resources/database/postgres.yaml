@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: postgres
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+          - name: POSTGRES_USER
+            value: myuser
+          - name: POSTGRES_PASSWORD
+            value: mypassword  # 👈 this must not be empty
+          - name: POSTGRES_DB
+            value: mydb
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    echo "[postStart] Waiting for Postgres to become ready..."
+                    for i in $(seq 1 30); do
+                      pg_isready -U myuser -d mydb && break
+                      echo "[postStart] Not ready yet..."
+                      sleep 2
+                    done
+
+                    echo "[postStart] Seeding database..."
+                    psql -U myuser -d mydb <<EOF
+                    CREATE TABLE IF NOT EXISTS messages (                      
+                      message TEXT NOT NULL
+                    );
+
+                    INSERT INTO messages (message) VALUES
+                      ('Hello');
+                    EOF
+
+                    if [ $? -eq 0 ]; then
+                      echo "[postStart] DB seeded successfully!"
+                    else
+                      echo "[postStart] DB seeding failed!"
+                    fi

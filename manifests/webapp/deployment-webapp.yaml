@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-webapp
+  template:
+    metadata:
+      labels:
+        app: hello-webapp
+    spec:
+      containers:
+        - name: hello-webapp
+          image: hello-webapp:latest
+          imagePullPolicy: Never
+          env:
+            - name: FASTAPI_URL
+              value: http://fastapi:8000
+          ports:
+            - containerPort: 5000
