@@ -1,35 +1,35 @@
-# kind-start.ps
+# start.ps
 
 # Start a kind cluster
 Write-Host "Starting kind cluster..."
 # Check if the cluster already exists
-$existingCluster = kind get clusters | Where-Object { $_ -eq "my-cluster" }
+$existingCluster = kind get clusters | Where-Object { $_ -eq "hello-cluster" }
 
 if ($existingCluster) {
-    Write-Host "Cluster 'my-cluster' already exists. Deleting it..."
-    kind delete cluster --name my-cluster
+    Write-Host "Cluster 'hello-cluster' already exists. Deleting it..."
+    kind delete cluster --name hello-cluster
 
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "Failed to delete existing cluster 'my-cluster'." -ForegroundColor Red
+        Write-Host "Failed to delete existing cluster 'hello-cluster'." -ForegroundColor Red
         exit 1
     }
 
-    Write-Host "Existing cluster 'my-cluster' deleted successfully."
+    Write-Host "Existing cluster 'hello-cluster' deleted successfully."
 }
 
 # Create a new cluster
-kind create cluster --name my-cluster
+kind create cluster --name hello-cluster
 
 # build images
 Write-Host "Building hello-service container"
-docker build -t fastapi-service ./source/hello-service
+docker build -t fastapi-service ../source/hello-service
 Write-Host "Building hello-webapp container"
-docker build -t hello-webapp ./source/hello-webapp
+docker build -t hello-webapp ../source/hello-webapp
 
 # Addd containers
 Write-Host "Adding containers to kind"
-kind load docker-image fastapi-service --name my-cluster
-kind load docker-image hello-webapp --name my-cluster
+kind load docker-image fastapi-service --name hello-cluster
+kind load docker-image hello-webapp --name hello-cluster
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed to create kind cluster." -ForegroundColor Red
@@ -79,9 +79,24 @@ Write-Host "Argo CD admin password:"
 Write-Host "Username: admin"
 Write-Host "Password: $password"
 
-# create root app-store argo app
-kubectl apply -f ./hello-cluster/app-store-apps.yaml
+# Expose ports
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/argocd-server -n argocd 8080:443" -NoNewWindow
+Write-Host "ArgoCD is not accessable at https://localhost:8080"
 
-# Expose argodcd
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/argocd-server -n argocd 8080:443"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/hello-webapp -n hello-system 5000:5000"
+# create root app-store argo app
+Write-Host "Creating root app-store app"
+kubectl apply -f ../hello-cluster/app-store-apps.yaml
+
+while (-not (kubectl get pod -n hello-system -l app=hello-webapp -o name)) {
+    Write-Host "Waiting for webapp(system app) pod to be created..."
+    Start-Sleep -Seconds 2
+}
+Write-Host "webapp pod created!, Exposing on port 5000; http://localhost:5000"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/hello-webapp -n hello-system 5000:5000" -NoNewWindow
+
+while (-not (kubectl get pod -n hello-api -l app=fastapi -o name)) {
+    Write-Host "Waiting for fastapi(service app) pod to be created..."
+    Start-Sleep -Seconds 2
+}
+Write-Host "fastapi pod created!, Exposing on port 8000; http://localhost:8000"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/fastapi -n hello-api 8000:8000" -NoNewWindow
