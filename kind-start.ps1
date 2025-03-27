@@ -36,9 +36,6 @@ Write-Host "Kind cluster started successfully."
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
-# Expose argodcd
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/argocd-server -n argocd 8080:443"
-
 ## Get argocd password password
 # Config
 $namespace = "argocd"
@@ -74,3 +71,10 @@ $password = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64S
 Write-Host "Argo CD admin password:"
 Write-Host "Username: admin"
 Write-Host "Password: $password"
+
+# create root app-store argo app
+kubectl apply -f ./hello-cluster/app-store-apps.yaml
+
+# Expose argodcd
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/argocd-server -n argocd 8080:443"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/hello-webapp -n hello-system 5000:5000"
