@@ -1,5 +1,5 @@
 namespace: hello-service
 
 resources:
-  - deployment.yaml
-  - service.yaml
+  - deployment-fastapi.yaml
+  - service-fastapi.yaml
