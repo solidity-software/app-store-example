@@ -1,0 +1,5 @@
+namespace: hello-webapp
+
+resources:
+  - deployment.yaml
+  - service.yaml
