@@ -20,7 +20,14 @@ if ($existingCluster) {
 # Create a new cluster
 kind create cluster --name my-cluster
 
+# build images
+Write-Host "Building hello-service container"
+docker build -t fastapi-service ./source/hello-service
+Write-Host "Building hello-webapp container"
+docker build -t hello-webapp ./source/hello-webapp
+
 # Addd containers
+Write-Host "Adding containers to kind"
 kind load docker-image fastapi-service --name my-cluster
 kind load docker-image hello-webapp --name my-cluster
 
