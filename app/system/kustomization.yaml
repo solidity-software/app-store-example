@@ -1,3 +1,3 @@
 resources:
-  - git::https://github.com/solidity-software/app-store-example.git//app/service?ref=main
-  - git::https://github.com/solidity-software/app-store-example.git//app/webapp?ref=main
+  - https://github.com/solidity-software/app-store-example.git//app/service?ref=main
+  - https://github.com/solidity-software/app-store-example.git//app/webapp?ref=main
