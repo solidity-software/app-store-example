@@ -23,11 +23,11 @@ apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
   name: generated-secret
-  namespace: default
+  namespace: hello-resources
 spec:
   secretStoreRef:
-    name: cluster-secret-store
-    kind: ClusterSecretStore
+    name: fake-secret-store
+    kind: SecretStore
   target:
     name: generated-secret
     creationPolicy: Owner
@@ -35,7 +35,7 @@ spec:
   data:
     - secretKey: postgres-password
       remoteRef:
-        key: dummy  # Required, even if unused
+        key: unused  
         property: unused
       generator:
         password:
