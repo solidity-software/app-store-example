@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/solidity-software/app-store-example.git
     targetRevision: main
-    path: app-store-repo/tenants/hello
+    path: repos/app-store-repo/tenants/hello
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
