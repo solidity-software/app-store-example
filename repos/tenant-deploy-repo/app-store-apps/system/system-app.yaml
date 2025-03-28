@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/solidity-software/app-store-example.git
     targetRevision: main
-    path: tenant-app-repo/system
+    path: repos/tenant-app-repo/system
   destination:
     server: https://kubernetes.default.svc
     namespace: hello-system
