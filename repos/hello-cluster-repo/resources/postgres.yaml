@@ -39,12 +39,15 @@ spec:
     name: generated-secret
     creationPolicy: Owner
     immutable: true
-  dataFrom:
-    - sourceRef:
-        generatorRef:
-          apiVersion: generators.external-secrets.io/v1alpha1
-          kind: Password
-          name: password-generator
+  data:
+    - secretKey: postgres-password 
+      remoteRef:
+        key: dummy
+        property: unused
+      generator:
+        password:
+          length: 32
+          symbols: 0
 
 ---
 apiVersion: apps/v1
