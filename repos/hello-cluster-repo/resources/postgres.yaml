@@ -19,6 +19,16 @@ spec:
   selector:
     app: postgres
 ---
+apiVersion: generators.external-secrets.io/v1alpha1
+kind: Password
+metadata:
+  name: password-generator
+  namespace: hello-resources
+spec:
+  length: 32
+  symbols: false
+
+---
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
@@ -34,7 +44,7 @@ spec:
         generatorRef:
           apiVersion: generators.external-secrets.io/v1alpha1
           kind: Password
-          name: generated-password
+          name: password-generator
 
 ---
 apiVersion: apps/v1
