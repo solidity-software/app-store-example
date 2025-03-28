@@ -26,7 +26,7 @@ metadata:
   namespace: hello-resources
 spec:
   length: 32
-  symbols: false
+  symbols: 0
 
 ---
 apiVersion: external-secrets.io/v1beta1
