@@ -42,7 +42,10 @@ spec:
           - name: POSTGRES_USER
             value: myuser
           - name: POSTGRES_PASSWORD
-            value: mypassword  # 👈 this must not be empty
+            valueFrom:
+                secretKeyRef:
+                  name: generated-secret
+                  key: postgres-password
           - name: POSTGRES_DB
             value: mydb
           lifecycle:

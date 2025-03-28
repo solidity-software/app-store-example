@@ -1,0 +1,21 @@
+# service-app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello-system
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/solidity-software/app-store-example.git
+    targetRevision: main
+    path: tenant-app-repo/system
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hello-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

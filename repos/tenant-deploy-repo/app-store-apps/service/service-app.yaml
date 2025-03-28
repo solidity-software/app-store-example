@@ -2,17 +2,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: hello-resources
+  name: hello-service
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/solidity-software/app-store-example.git
     targetRevision: main
-    path: app/resources/database
+    path: tenant-app-repo/service
   destination:
     server: https://kubernetes.default.svc
-    namespace: hello-resources
+    namespace: hello-api
   syncPolicy:
     automated:
       prune: true

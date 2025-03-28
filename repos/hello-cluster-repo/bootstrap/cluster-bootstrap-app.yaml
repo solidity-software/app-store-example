@@ -2,17 +2,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: app-store-apps
+  name: cluster-bootstrap
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/solidity-software/app-store-example.git
     targetRevision: main
-    path: app-store/hello
+    path: repos/hello-cluster-repo/bootstrap/cluster-bootstrap
   destination:
     server: https://kubernetes.default.svc
-    namespace: appstore
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true

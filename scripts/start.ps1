@@ -22,9 +22,9 @@ kind create cluster --name hello-cluster
 
 # build images
 Write-Host "Building hello-service container"
-docker build -t fastapi-service ../source/hello-service
+docker build -t fastapi-service ../repos/tenant-source-repo/hello-service
 Write-Host "Building hello-webapp container"
-docker build -t hello-webapp ../source/hello-webapp
+docker build -t hello-webapp ../repos/tenant-source-repo/hello-webapp
 
 # Addd containers
 Write-Host "Adding containers to kind"
@@ -55,7 +55,7 @@ do {
     $pods = kubectl get pods -n $namespace
     $notReady = $pods -match '0/1|0/2|ContainerCreating|Pending|CrashLoopBackOff'
     if ($notReady) {
-        Write-Host "  Still waiting on pods..."
+        Write-Host "  Still waiting on argocd pods..."
         Start-Sleep -Seconds 3
     }
 } while ($notReady)
@@ -85,7 +85,7 @@ Write-Host "ArgoCD is not accessable at https://localhost:8080"
 
 # create root app-store argo app
 Write-Host "Creating root app-store app"
-kubectl apply -f ../hello-cluster/app-store-apps.yaml
+kubectl apply -f ../repos/hello-cluster-repo/bootstrap/cluster-bootstrap-app.yaml
 
 while (-not (kubectl get pod -n hello-system -l app=hello-webapp -o name)) {
     Write-Host "Waiting for webapp(system app) pod to be created..."
