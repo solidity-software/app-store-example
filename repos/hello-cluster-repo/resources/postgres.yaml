@@ -25,22 +25,16 @@ metadata:
   name: generated-secret
   namespace: hello-resources
 spec:
-  secretStoreRef:
-    name: fake-local-store
-    kind: SecretStore
   target:
     name: generated-secret
     creationPolicy: Owner
     immutable: true
-  data:
-    - secretKey: postgres-password
-      remoteRef:
-        key: unused  
-        property: unused
-      generator:
-        password:
-          length: 20
-          symbols: false
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: Password
+          name: generated-password
 
 ---
 apiVersion: apps/v1
