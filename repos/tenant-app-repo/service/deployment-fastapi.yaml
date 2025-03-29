@@ -25,6 +25,6 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: shared-postgres-secret
-                  key: postgres-password
+                  key: password
           ports:
             - containerPort: 8000
