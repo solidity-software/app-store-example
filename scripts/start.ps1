@@ -87,16 +87,12 @@ Write-Host "ArgoCD is not accessable at https://localhost:8080"
 Write-Host "Creating root app-store app"
 kubectl apply -f ../repos/hello-cluster-repo/bootstrap/cluster-bootstrap-app.yaml
 
-while (-not (kubectl get pod -n hello-system -l app=hello-webapp -o name)) {
-    Write-Host "Waiting for webapp(system app) pod to be created..."
-    Start-Sleep -Seconds 2
-}
+kubectl wait --for=condition=ready pod -l app=hello-webapp -n hello-system 
+
 Write-Host "webapp pod created!, Exposing on port 5000; http://localhost:5000"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/hello-webapp -n hello-system 5000:5000" -NoNewWindow
 
-while (-not (kubectl get pod -n hello-api -l app=fastapi -o name)) {
-    Write-Host "Waiting for fastapi(service app) pod to be created..."
-    Start-Sleep -Seconds 2
-}
+kubectl wait --for=condition=ready pod -l app=fastapi -n hello-api 
+
 Write-Host "fastapi pod created!, Exposing on port 8000; http://localhost:8000"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/fastapi -n hello-api 8000:8000" -NoNewWindow
