@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: oci://registry-1.docker.io/bitnamicharts/kubeapps
+    repoURL: registry-1.docker.io/bitnamicharts/kubeapps
     chart: kubeapps
     targetRevision: 0.9.13  # Or latest version at https://charts.external-secrets.io/index.yaml
     helm:
