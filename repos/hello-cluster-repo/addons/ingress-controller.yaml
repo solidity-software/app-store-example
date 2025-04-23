@@ -1,6 +1,30 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: apisix
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.apiseven.com
+    chart: apisix
+    targetRevision: 2.5.0  # Replace with latest if needed
+    helm:
+      releaseName: apisix
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: apisix
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: apisix-ingress-controller
   namespace: argocd
 spec:
@@ -8,17 +32,46 @@ spec:
   source:
     repoURL: https://charts.apiseven.com
     chart: apisix-ingress-controller
-    targetRevision: 1.7.0   # Use the latest stable version
+    targetRevision: 1.7.0
     helm:
       releaseName: apisix-ingress-controller
       values: |
         config:
-          ingressController:
-            enableApisixDashboard: true
+          ingressClass: apisix
   destination:
     server: https://kubernetes.default.svc
-    namespace: apisix-ingress
+    namespace: apisix
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apisix-dashboard
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.apiseven.com
+    chart: apisix-dashboard
+    targetRevision: 0.7.0
+    helm:
+      releaseName: apisix-dashboard
+      values: |
+        config:
+          conf:
+            allow_admin:
+              - 0.0.0.0/0
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: apisix
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
