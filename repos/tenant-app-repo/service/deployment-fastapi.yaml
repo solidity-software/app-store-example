@@ -12,6 +12,21 @@ spec:
       labels:
         app: fastapi
     spec:
+      initContainers:
+        - name: wait-for-secret
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              while [ ! -f /var/run/secrets/kubernetes.io/serviceaccount/token ]; do
+                echo "Waiting for Kubernetes service account token..."
+                sleep 1
+              done
+              while ! kubectl get secret shared-postgres-secret -n hello-resources; do
+                echo "Waiting for secret 'shared-postgres-secret'..."
+                sleep 2
+              done
       containers:
         - name: fastapi
           image: fastapi-service:latest
