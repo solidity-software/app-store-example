@@ -3,4 +3,4 @@ namespace: hello-api
 resources:
   - deployment-fastapi.yaml
   - service-fastapi.yaml
-  - ingress-fastapi.yaml
+  - ingress.yaml
