@@ -1,5 +1,24 @@
 # start.ps
 
+
+# Trap Ctrl+C
+$jobs = @()
+
+$stopScript = {
+    Write-Host "Stopping all background jobs..." -ForegroundColor Yellow
+    foreach ($job in $jobs) {
+        if ($job.State -eq 'Running') {
+            Stop-Job $job.Id
+            Remove-Job $job.Id
+        }
+    }
+    Exit 1
+}
+
+# Register Ctrl+C Handler
+$null = Register-EngineEvent PowerShell.Exiting -Action $stopScript
+
+
 # Start a kind cluster
 Write-Host "Starting kind cluster..."
 # Check if the cluster already exists
@@ -80,19 +99,51 @@ Write-Host "Username: admin"
 Write-Host "Password: $password"
 
 # Expose ports
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/argocd-server -n argocd 8080:443" -NoNewWindow
+$jobs += Start-Job { kubectl port-forward svc/argocd-server -n argocd 8080:443 }
 Write-Host "ArgoCD is not accessable at https://localhost:8080"
 
 # create root app-store argo app
 Write-Host "Creating root app-store app"
 kubectl apply -f ../repos/hello-cluster-repo/bootstrap/cluster-bootstrap-app.yaml
 
-kubectl wait --for=condition=ready pod -l app=hello-webapp -n hello-system 
+do {
+    $namespace = kubectl get namespace hello-system --ignore-not-found
+    if (-not $namespace) {
+        Write-Host "Waiting for namespace 'hello-system' to be created..."
+        Start-Sleep -Seconds 2
+    }
+} while (-not $namespace)
+do {
+    $podExists = kubectl get pods -n hello-system -l app=hello-webapp --no-headers --ignore-not-found
+    if (-not $podExists) {
+        Write-Host "Waiting for webapp pod to be created..."
+        Start-Sleep -Seconds 2
+    }
+} while (-not $podExists)
 
+kubectl wait --for=condition=ready pod -l app=hello-webapp -n hello-system 
 Write-Host "webapp pod created!, Exposing on port 5000; http://localhost:5000"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/hello-webapp -n hello-system 5000:5000" -NoNewWindow
+$jobs += Start-Job { kubectl port-forward svc/hello-webapp -n hello-system 5000:5000 }
+
+do {
+    $namespace = kubectl get namespace hello-api --ignore-not-found
+    if (-not $namespace) {        
+        Start-Sleep -Seconds 2
+    }
+} while (-not $namespace)
+do {
+    $podExists = kubectl get pods -n hello-api -l app=fastapi --no-headers --ignore-not-found
+    if (-not $podExists) {
+        Write-Host "Waiting for fastapi pod to be created..."
+        Start-Sleep -Seconds 2
+    }
+} while (-not $podExists)
 
 kubectl wait --for=condition=ready pod -l app=fastapi -n hello-api 
-
 Write-Host "fastapi pod created!, Exposing on port 8000; http://localhost:8000"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "kubectl port-forward svc/fastapi -n hello-api 8000:8000" -NoNewWindow
+$jobs += Start-Job { kubectl port-forward svc/fastapi -n hello-api 8000:8000 }
+Write-Host "Hello-Cluster Running and Bootstrapped. Press Ctrl+C to stop."
+Wait-Event  # Wait forever until Ctrl+C
+
+Write-Host "Destrotying kind cluster..."
+kind delete cluster --name hello-cluster

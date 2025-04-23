@@ -1,0 +1,16 @@
+apiVersion: apisix.apache.org/v2beta3
+kind: ApisixRoute
+metadata:
+  name: api-service-ingress
+  namespace: default
+spec:
+  http:
+    - name: api-service-route
+      match:
+        hosts:
+          - api.hello-cluster.com
+        paths:
+          - /*
+      backends:
+        - serviceName: fastapi
+          servicePort: 8000
