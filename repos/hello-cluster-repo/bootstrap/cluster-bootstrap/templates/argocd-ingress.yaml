@@ -1,0 +1,16 @@
+apiVersion: apisix.apache.org/v2beta3
+kind: ApisixRoute
+metadata:
+  name: argocd-service-ingress
+  namespace: default
+spec:
+  http:
+    - name: argocd-server-route
+      match:
+        hosts:
+          - argocd.hello-cluster.com
+        paths:
+          - /*
+      backends:
+        - serviceName: argocd-server
+          servicePort: 8080
