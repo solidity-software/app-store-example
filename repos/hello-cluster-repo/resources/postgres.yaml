@@ -38,7 +38,7 @@ spec:
   target:
     name: generated-secret
     creationPolicy: Owner
-    immutable: true
+    # immutable: true
   dataFrom:
     - sourceRef:
         generatorRef:
