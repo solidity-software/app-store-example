@@ -121,9 +121,9 @@ do {
     }
 } while (-not $podExists)
 
-Add-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Value "`nlocalhost api.hello-cluster.com"
-Add-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Value "`nlocalhost webapp.hello-cluster.com"
-Add-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Value "`nlocalhost argocd.hello-cluster.com"
+# Add-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Value "`nlocalhost api.hello-cluster.com"
+# Add-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Value "`nlocalhost webapp.hello-cluster.com"
+# Add-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Value "`nlocalhost argocd.hello-cluster.com"
 
 kubectl wait --for=condition=ready pod -l app=hello-webapp -n hello-system 
 Write-Host "webapp pod created!, Exposing on port 5000; http://localhost:5000"
